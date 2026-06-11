@@ -1,0 +1,1262 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Visual Calculus: Integrals & Area Under the Curve</title>
+    <style>
+        :root {
+            --bg-primary: #0f172a;
+            --bg-secondary: #1e293b;
+            --bg-tertiary: #334155;
+            --accent-primary: #3b82f6;
+            --accent-primary-hover: #2563eb;
+            --accent-green: #10b981;
+            --accent-red: #ef4444;
+            --text-main: #f8fafc;
+            --text-muted: #94a3b8;
+            --border-color: #475569;
+            --sidebar-width: 420px;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+            -webkit-font-smoothing: antialiased;
+            -moz-osx-font-smoothing: grayscale;
+        }
+
+        body {
+            background-color: var(--bg-primary);
+            color: var(--text-main);
+            overflow: hidden;
+            height: 100vh;
+            width: 100vw;
+            display: flex;
+        }
+
+        /* Responsive grid layout */
+        .app-container {
+            display: flex;
+            width: 100%;
+            height: 100%;
+            position: relative;
+        }
+
+        /* Sidebar Styling */
+        .sidebar {
+            width: var(--sidebar-width);
+            background-color: var(--bg-secondary);
+            border-right: 1px solid var(--border-color);
+            padding: 24px;
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+            overflow-y: auto;
+            z-index: 10;
+            box-shadow: 4px 0 25px rgba(0, 0, 0, 0.3);
+        }
+
+        .header {
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
+        }
+
+        .header h1 {
+            font-size: 20px;
+            font-weight: 700;
+            letter-spacing: -0.5px;
+            background: linear-gradient(135deg, #60a5fa, #3b82f6);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .header p {
+            font-size: 13px;
+            color: var(--text-muted);
+            line-height: 1.4;
+        }
+
+        /* Card Container Styling */
+        .card {
+            background-color: var(--bg-primary);
+            border: 1px solid var(--border-color);
+            border-radius: 12px;
+            padding: 16px;
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+
+        .card-title {
+            font-size: 11px;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            color: var(--text-muted);
+            margin-bottom: 4px;
+        }
+
+        /* Form Controls */
+        .form-group {
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
+        }
+
+        label {
+            font-size: 12px;
+            font-weight: 600;
+            color: var(--text-main);
+        }
+
+        .input-with-icon {
+            position: relative;
+            display: flex;
+            align-items: center;
+        }
+
+        .input-icon {
+            position: absolute;
+            left: 12px;
+            color: var(--accent-primary);
+            font-weight: bold;
+            font-size: 14px;
+            user-select: none;
+        }
+
+        input[type="text"] {
+            width: 100%;
+            background-color: var(--bg-secondary);
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            color: var(--text-main);
+            padding: 10px 12px 10px 32px;
+            font-size: 14px;
+            font-family: "Courier New", Courier, monospace;
+            font-weight: bold;
+            transition: border-color 0.2s, box-shadow 0.2s;
+        }
+
+        input[type="text"]:focus {
+            outline: none;
+            border-color: var(--accent-primary);
+            box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.25);
+        }
+
+        /* Numerical & Slider Combo styling */
+        .range-container {
+            display: flex;
+            flex-direction: column;
+            gap: 4px;
+        }
+
+        .range-inputs {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 10px;
+        }
+
+        input[type="number"] {
+            width: 70px;
+            background-color: var(--bg-secondary);
+            border: 1px solid var(--border-color);
+            border-radius: 6px;
+            color: var(--text-main);
+            padding: 6px;
+            font-size: 13px;
+            text-align: center;
+        }
+
+        input[type="number"]:focus {
+            outline: none;
+            border-color: var(--accent-primary);
+        }
+
+        input[type="range"] {
+            flex: 1;
+            -webkit-appearance: none;
+            background: var(--bg-tertiary);
+            height: 6px;
+            border-radius: 3px;
+            outline: none;
+        }
+
+        input[type="range"]::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            appearance: none;
+            width: 16px;
+            height: 16px;
+            border-radius: 50%;
+            background: var(--accent-primary);
+            cursor: pointer;
+            transition: transform 0.1s, background-color 0.1s;
+        }
+
+        input[type="range"]::-webkit-slider-thumb:hover {
+            transform: scale(1.2);
+            background: #60a5fa;
+        }
+
+        /* Results Card */
+        .results-container {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+
+        .result-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 8px 0;
+            border-bottom: 1px dashed var(--border-color);
+        }
+
+        .result-row:last-child {
+            border-bottom: none;
+        }
+
+        .result-label {
+            font-size: 13px;
+            color: var(--text-muted);
+        }
+
+        .result-value {
+            font-size: 15px;
+            font-weight: 700;
+            font-family: monospace;
+        }
+
+        .integral-output-block {
+            background: linear-gradient(135deg, rgba(59, 130, 246, 0.1) 0%, rgba(37, 99, 235, 0.05) 100%);
+            border: 1px solid rgba(59, 130, 246, 0.3);
+            border-radius: 8px;
+            padding: 12px;
+            text-align: center;
+            margin-top: 5px;
+        }
+
+        .integral-formula {
+            font-size: 11px;
+            color: var(--text-muted);
+            margin-bottom: 4px;
+            font-style: italic;
+        }
+
+        .integral-value {
+            font-size: 22px;
+            font-weight: 800;
+            color: #60a5fa;
+            font-family: 'Courier New', Courier, monospace;
+        }
+
+        /* Preset select */
+        select {
+            width: 100%;
+            background-color: var(--bg-secondary);
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            color: var(--text-main);
+            padding: 10px;
+            font-size: 13px;
+            outline: none;
+            cursor: pointer;
+            transition: border-color 0.2s;
+        }
+
+        select:focus {
+            border-color: var(--accent-primary);
+        }
+
+        /* Instructions list */
+        .instruction-item {
+            display: flex;
+            gap: 8px;
+            font-size: 12px;
+            color: var(--text-muted);
+            line-height: 1.4;
+        }
+
+        .instruction-bullet {
+            color: var(--accent-primary);
+            font-weight: bold;
+        }
+
+        /* Main Workspace Graph area */
+        .graph-workspace {
+            flex: 1;
+            position: relative;
+            background-color: #0b0f19;
+            overflow: hidden;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        canvas {
+            display: block;
+            cursor: grab;
+            width: 100%;
+            height: 100%;
+        }
+
+        canvas:active {
+            cursor: grabbing;
+        }
+
+        /* Error Banner */
+        .error-message {
+            background-color: rgba(239, 68, 68, 0.15);
+            border: 1px solid var(--accent-red);
+            border-radius: 8px;
+            padding: 10px;
+            color: #fca5a5;
+            font-size: 12px;
+            display: none;
+            word-break: break-all;
+        }
+
+        /* Canvas Controls Overlay (Reset view, etc) */
+        .canvas-controls {
+            position: absolute;
+            bottom: 24px;
+            right: 24px;
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+            background-color: rgba(30, 41, 59, 0.85);
+            backdrop-filter: blur(8px);
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            padding: 8px;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.4);
+            z-index: 5;
+        }
+
+        .control-btn {
+            background: var(--bg-secondary);
+            border: 1px solid var(--border-color);
+            color: var(--text-main);
+            width: 36px;
+            height: 36px;
+            border-radius: 6px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: all 0.2s;
+            font-size: 16px;
+            font-weight: bold;
+        }
+
+        .control-btn:hover {
+            background: var(--accent-primary);
+            border-color: var(--accent-primary);
+            transform: translateY(-1px);
+        }
+
+        /* Tooltip style indicator on canvas */
+        .graph-indicator {
+            position: absolute;
+            background-color: rgba(15, 23, 42, 0.95);
+            border: 1px solid var(--border-color);
+            border-radius: 6px;
+            padding: 6px 10px;
+            font-size: 11px;
+            font-family: monospace;
+            pointer-events: none;
+            display: none;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.5);
+            z-index: 8;
+        }
+
+        /* Responsive adjust */
+        @media (max-width: 900px) {
+            body {
+                flex-direction: column;
+                overflow: auto;
+            }
+            .app-container {
+                flex-direction: column-reverse;
+                height: auto;
+                min-height: 100vh;
+            }
+            .sidebar {
+                width: 100%;
+                height: auto;
+                border-right: none;
+                border-top: 1px solid var(--border-color);
+                box-shadow: 0 -4px 25px rgba(0, 0, 0, 0.3);
+                overflow-y: visible;
+            }
+            .graph-workspace {
+                height: 55vh;
+                min-height: 350px;
+                flex: none;
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <div class="app-container">
+        <!-- Sidebar containing options, math definitions, and computations -->
+        <div class="sidebar">
+            <div class="header">
+                <h1>Visual Definite Integral</h1>
+                <p>Interactive tool to parse functions, calculate precise numerical areas, and explore visual calculus boundaries.</p>
+            </div>
+
+            <!-- Library/Presets Card -->
+            <div class="card">
+                <div class="card-title">Select Preset Equation</div>
+                <select id="preset-select">
+                    <option value="parabola">Parabola (Default) ➔ x² - 5x + 6</option>
+                    <option value="sine">Harmonic Sine ➔ sin(x) + 1.2</option>
+                    <option value="bell">Gaussian Bell Curve ➔ 4 * exp(-x² / 4)</option>
+                    <option value="cubic">Cubic Polynomial ➔ 0.1 * (x³ - 3x² - 10x + 24)</option>
+                    <option value="damped">Damped Wave ➔ exp(-0.2*x) * cos(x)</option>
+                    <option value="custom">-- Custom Function (Edit below) --</option>
+                </select>
+            </div>
+
+            <!-- Mathematical Definition Inputs -->
+            <div class="card">
+                <div class="card-title">Function & Integration Bounds</div>
+                
+                <div class="form-group">
+                    <label for="function-input">Function f(x):</label>
+                    <div class="input-with-icon">
+                        <span class="input-icon">ƒ</span>
+                        <input type="text" id="function-input" value="x*x - 5*x + 6" placeholder="e.g. x^2 - 5*x + 6">
+                    </div>
+                </div>
+
+                <!-- Error Box -->
+                <div id="error-box" class="error-message"></div>
+
+                <!-- Slider & input range a -->
+                <div class="range-container">
+                    <div class="range-inputs">
+                        <label for="slider-a">Lower Bound (a):</label>
+                        <input type="number" id="num-a" step="0.1" value="4.0">
+                    </div>
+                    <input type="range" id="slider-a" min="-10" max="10" step="0.05" value="4.0">
+                </div>
+
+                <!-- Slider & input range b -->
+                <div class="range-container">
+                    <div class="range-inputs">
+                        <label for="slider-b">Upper Bound (b):</label>
+                        <input type="number" id="num-b" step="0.1" value="5.0">
+                    </div>
+                    <input type="range" id="slider-b" min="-10" max="10" step="0.05" value="5.0">
+                </div>
+            </div>
+
+            <!-- Analytical Outcomes & Integrals -->
+            <div class="card">
+                <div class="card-title">Calculations & Results</div>
+                <div class="results-container">
+                    <div class="integral-output-block">
+                        <div class="integral-formula">∫<sub>a</sub><sup>b</sup> f(x) dx</div>
+                        <div id="integral-result" class="integral-value">0.6667</div>
+                    </div>
+
+                    <div class="result-row">
+                        <span class="result-label">Net Integral:</span>
+                        <span id="res-net" class="result-value">0.6667</span>
+                    </div>
+                    <div class="result-row">
+                        <span class="result-label">Geometric Area (|y|):</span>
+                        <span id="res-geometric" class="result-value">0.6667</span>
+                    </div>
+                    <div class="result-row">
+                        <span class="result-label">f(a) at Boundary:</span>
+                        <span id="res-fa" class="result-value">2.0000</span>
+                    </div>
+                    <div class="result-row">
+                        <span class="result-label">f(b) at Boundary:</span>
+                        <span id="res-fb" class="result-value">6.0000</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Interactive Guide Card -->
+            <div class="card">
+                <div class="card-title">Interactive Graph Guide</div>
+                <div style="display: flex; flex-direction: column; gap: 8px;">
+                    <div class="instruction-item">
+                        <span class="instruction-bullet">❶</span>
+                        <span><strong>Pan & Zoom:</strong> Drag the background to pan. Use your mouse scroll-wheel to zoom in and out.</span>
+                    </div>
+                    <div class="instruction-item">
+                        <span class="instruction-bullet">❷</span>
+                        <span><strong>Boundary Sliders:</strong> Grab & drag the orange/yellow vertical bounds lines directly on the graph.</span>
+                    </div>
+                    <div class="instruction-item">
+                        <span class="instruction-bullet">❸</span>
+                        <span><strong>Equation Rules:</strong> Use standard expressions. Valid: <code>x^2</code>, <code>2*x</code>, <code>sin(x)</code>, <code>exp(-x)</code>.</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Right Side Graphing Workspace -->
+        <div class="graph-workspace" id="workspace">
+            <canvas id="graph-canvas"></canvas>
+            
+            <!-- Controls overlaid directly on Canvas -->
+            <div class="canvas-controls">
+                <button class="control-btn" id="btn-zoom-in" title="Zoom In">+</button>
+                <button class="control-btn" id="btn-zoom-out" title="Zoom Out">−</button>
+                <button class="control-btn" id="btn-reset-view" title="Reset Camera">⊙</button>
+            </div>
+
+            <!-- Canvas coordinates/info on hover -->
+            <div class="graph-indicator" id="graph-indicator"></div>
+        </div>
+    </div>
+
+    <script>
+        // Set up global environment and state
+        const canvas = document.getElementById('graph-canvas');
+        const ctx = canvas.getContext('2d');
+        const workspace = document.getElementById('workspace');
+        
+        const funcInput = document.getElementById('function-input');
+        const errorBox = document.getElementById('error-box');
+        
+        const sliderA = document.getElementById('slider-a');
+        const sliderB = document.getElementById('slider-b');
+        const numA = document.getElementById('num-a');
+        const numB = document.getElementById('num-b');
+        
+        const presetSelect = document.getElementById('preset-select');
+        
+        // Output DOMs
+        const integralResult = document.getElementById('integral-result');
+        const resNet = document.getElementById('res-net');
+        const resGeometric = document.getElementById('res-geometric');
+        const resFa = document.getElementById('res-fa');
+        const resFb = document.getElementById('res-fb');
+        
+        const indicator = document.getElementById('graph-indicator');
+
+        // Preset Equations Configuration
+        const PRESETS = {
+            parabola: {
+                f: "x*x - 5*x + 6",
+                a: 4,
+                b: 5
+            },
+            sine: {
+                f: "sin(x) + 1.2",
+                a: -Math.PI,
+                b: Math.PI
+            },
+            bell: {
+                f: "4 * exp(-x*x / 4)",
+                a: -2,
+                b: 2
+            },
+            cubic: {
+                f: "0.1 * (x*x*x - 3*x*x - 10*x + 24)",
+                a: -2,
+                b: 5
+            },
+            damped: {
+                f: "exp(-0.2*x) * cos(x)",
+                a: 0,
+                b: 8
+            }
+        };
+
+        // Graph viewport configurations
+        let viewport = {
+            centerX: 0,    // Center X point in Cartesian coordinates
+            centerY: 0,    // Center Y point in Cartesian coordinates
+            scaleX: 50,     // Pixels per 1 unit on X axis
+            scaleY: 50,     // Pixels per 1 unit on Y axis
+            isDragging: false,
+            startX: 0,
+            startY: 0,
+            initialCenterX: 0,
+            initialCenterY: 0
+        };
+
+        // UI Interactive boundary values
+        let state = {
+            a: 4.0,
+            b: 5.0,
+            compiledFunc: null,
+            exprString: "x*x - 5*x + 6",
+            draggingBound: null // 'a', 'b' or null
+        };
+
+        // Safely parse and convert math mathematical expression strings to JS
+        function parseExpression(expr) {
+            // Strip any malicious characters. Only allow mathematical symbols, x, functions
+            let cleaned = expr.toLowerCase()
+                .replace(/\s+/g, '') // remove spaces
+                .replace(/\^/g, '**') // power symbol
+                .replace(/(\d+)(x)/g, '$1*$2') // implicit multiplication like 2x -> 2*x
+                .replace(/(\))(x)/g, '$1*$2') // implicit multiplication like )x -> )*x
+                .replace(/(x)(\()/g, '$1*$2') // implicit multiplication like x( -> x*(
+                ;
+
+            // Mapping of allowed functions/constants with standard equivalents
+            const allowedTokens = {
+                'sin': 'Math.sin',
+                'cos': 'Math.cos',
+                'tan': 'Math.tan',
+                'sqrt': 'Math.sqrt',
+                'abs': 'Math.abs',
+                'exp': 'Math.exp',
+                'log': 'Math.log',
+                'ln': 'Math.log', // Map common natural log usage to log
+                'pi': 'Math.PI',
+                'e': 'Math.E'
+            };
+
+            // Safely substitute functions keeping word boundaries in mind
+            for (let [key, val] of Object.entries(allowedTokens)) {
+                let regex = new RegExp('\\b' + key + '\\b', 'g');
+                cleaned = cleaned.replace(regex, val);
+            }
+
+            // Perform safety validation: Only permit math constructs, variables, numbers, operators
+            const safePattern = /^[0-9x+\-*/%().,\s]|Math\.[a-zA-Z]+/i;
+            const forbiddenMatch = cleaned.replace(/Math\.[a-zA-Z]+/g, '').replace(/[0-9x+\-*/%().,\s*]/g, '');
+            
+            if (forbiddenMatch.length > 0) {
+                throw new Error(`Invalid symbol or syntax detected: "${forbiddenMatch[0]}"`);
+            }
+
+            // Create executable function via safe function construction constructor
+            try {
+                const fn = new Function('x', `
+                    try {
+                        with (Math) {
+                            return ${cleaned};
+                        }
+                    } catch (e) {
+                        return NaN;
+                    }
+                `);
+                // Test run to check if evaluating values triggers a mathematical crash
+                const testVal = fn(1);
+                return fn;
+            } catch (err) {
+                throw new Error("Syntax error. Check your brackets or operator placement.");
+            }
+        }
+
+        // Initialize viewport scales
+        function initViewport() {
+            viewport.scaleX = canvas.width / 16; // Display roughly -8 to 8 on load
+            viewport.scaleY = canvas.height / 10;
+            viewport.centerX = 0;
+            viewport.centerY = 0;
+        }
+
+        // Canvas conversion helpers
+        function toCanvasCoords(x, y) {
+            const pixelX = canvas.width / 2 + (x - viewport.centerX) * viewport.scaleX;
+            const pixelY = canvas.height / 2 - (y - viewport.centerY) * viewport.scaleY;
+            return { x: pixelX, y: pixelY };
+        }
+
+        function toCartesianCoords(px, py) {
+            const cartX = viewport.centerX + (px - canvas.width / 2) / viewport.scaleX;
+            const cartY = viewport.centerY - (py - canvas.height / 2) / viewport.scaleY;
+            return { x: cartX, y: cartY };
+        }
+
+        // Perform numerical integrals using Simpson's 1/3 Rule
+        function calculateIntegrals() {
+            if (!state.compiledFunc) return;
+
+            const n = 2000; // Even number of intervals for rich precision
+            const start = Math.min(state.a, state.b);
+            const end = Math.max(state.a, state.b);
+            const h = (end - start) / n;
+
+            let netSum = 0;
+            let absSum = 0;
+
+            const f_start = state.compiledFunc(start);
+            const f_end = state.compiledFunc(end);
+            
+            if (!isNaN(f_start)) {
+                netSum += f_start;
+                absSum += Math.abs(f_start);
+            }
+            if (!isNaN(f_end)) {
+                netSum += f_end;
+                absSum += Math.abs(f_end);
+            }
+
+            for (let i = 1; i < n; i++) {
+                const x = start + i * h;
+                const fx = state.compiledFunc(x);
+                if (isNaN(fx)) continue;
+
+                const coeff = (i % 2 === 0) ? 2 : 4;
+                netSum += coeff * fx;
+                absSum += coeff * Math.abs(fx);
+            }
+
+            let resultNet = (h / 3) * netSum;
+            let resultAbs = (h / 3) * absSum;
+
+            // If bounds are inverted (a > b), net integral goes negative
+            if (state.a > state.b) {
+                resultNet = -resultNet;
+            }
+
+            // Update UI
+            integralResult.innerText = isNaN(resultNet) ? "Error" : resultNet.toFixed(5);
+            resNet.innerText = isNaN(resultNet) ? "Error" : resultNet.toFixed(5);
+            resGeometric.innerText = isNaN(resultAbs) ? "Error" : resultAbs.toFixed(5);
+            
+            const faVal = state.compiledFunc(state.a);
+            const fbVal = state.compiledFunc(state.b);
+            resFa.innerText = isNaN(faVal) ? "Error" : faVal.toFixed(5);
+            resFb.innerText = isNaN(fbVal) ? "Error" : fbVal.toFixed(5);
+        }
+
+        // Parse and validate current functional inputs
+        function updateFunction() {
+            const expr = funcInput.value;
+            try {
+                const compiled = parseExpression(expr);
+                state.compiledFunc = compiled;
+                state.exprString = expr;
+                errorBox.style.display = 'none';
+                calculateIntegrals();
+                draw();
+            } catch (err) {
+                errorBox.innerText = err.message;
+                errorBox.style.display = 'block';
+                integralResult.innerText = "Error";
+                resNet.innerText = "Error";
+                resGeometric.innerText = "Error";
+            }
+        }
+
+        // Draw graph grid & functions
+        function draw() {
+            // Setup responsive sizing
+            const rect = workspace.getBoundingClientRect();
+            if (canvas.width !== rect.width || canvas.height !== rect.height) {
+                canvas.width = rect.width;
+                canvas.height = rect.height;
+                if (viewport.scaleX === 50) { // First time setup
+                    initViewport();
+                }
+            }
+
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+            // 1. Draw Grid Lines & Numeric Coordinates
+            drawGrid();
+
+            // 2. Shade Area Under Curve (Integral Area)
+            if (state.compiledFunc) {
+                shadeArea();
+                plotFunction();
+            }
+
+            // 3. Draw boundary lines/handles for a & b
+            drawBoundaries();
+        }
+
+        function drawGrid() {
+            const gridSpacing = calculateGridSpacing();
+            const minX = toCartesianCoords(0, 0).x;
+            const maxX = toCartesianCoords(canvas.width, 0).x;
+            const minY = toCartesianCoords(0, canvas.height).y;
+            const maxY = toCartesianCoords(0, 0).y;
+
+            ctx.lineWidth = 1;
+
+            // Draw vertical grid lines
+            let startGridX = Math.floor(minX / gridSpacing) * gridSpacing;
+            for (let x = startGridX; x <= maxX; x += gridSpacing) {
+                const p = toCanvasCoords(x, 0);
+                
+                // Color major vs minor grid axes lines
+                if (Math.abs(x) < 0.0001) {
+                    ctx.strokeStyle = '#64748b'; // Y-axis
+                    ctx.lineWidth = 2;
+                } else {
+                    ctx.strokeStyle = '#1e293b';
+                    ctx.lineWidth = 1;
+                }
+                ctx.beginPath();
+                ctx.moveTo(p.x, 0);
+                ctx.lineTo(p.x, canvas.height);
+                ctx.stroke();
+
+                // Axis label coordinates
+                if (Math.abs(x) > 0.0001) {
+                    ctx.fillStyle = '#94a3b8';
+                    ctx.font = '10px monospace';
+                    ctx.textAlign = 'center';
+                    const yAxisPos = Math.max(10, Math.min(canvas.height - 15, toCanvasCoords(0, 0).y + 15));
+                    ctx.fillText(parseFloat(x.toFixed(4)), p.x, yAxisPos);
+                }
+            }
+
+            // Draw horizontal grid lines
+            let startGridY = Math.floor(minY / gridSpacing) * gridSpacing;
+            for (let y = startGridY; y <= maxY; y += gridSpacing) {
+                const p = toCanvasCoords(0, y);
+
+                // Color major vs minor grid axes lines
+                if (Math.abs(y) < 0.0001) {
+                    ctx.strokeStyle = '#64748b'; // X-axis
+                    ctx.lineWidth = 2;
+                } else {
+                    ctx.strokeStyle = '#1e293b';
+                    ctx.lineWidth = 1;
+                }
+                ctx.beginPath();
+                ctx.moveTo(0, p.y);
+                ctx.lineTo(canvas.width, p.y);
+                ctx.stroke();
+
+                // Axis label coordinates
+                if (Math.abs(y) > 0.0001) {
+                    ctx.fillStyle = '#94a3b8';
+                    ctx.font = '10px monospace';
+                    ctx.textAlign = 'right';
+                    const xAxisPos = Math.max(25, Math.min(canvas.width - 10, toCanvasCoords(0, 0).x - 10));
+                    ctx.fillText(parseFloat(y.toFixed(4)), xAxisPos, p.y + 3);
+                }
+            }
+
+            // Draw origin designation (0, 0)
+            const origin = toCanvasCoords(0, 0);
+            if (origin.x >= 0 && origin.x <= canvas.width && origin.y >= 0 && origin.y <= canvas.height) {
+                ctx.fillStyle = '#94a3b8';
+                ctx.font = '10px monospace';
+                ctx.textAlign = 'right';
+                ctx.fillText("0", origin.x - 8, origin.y + 12);
+            }
+        }
+
+        // Dynamically compute grid line spacing on panning/zooming
+        function calculateGridSpacing() {
+            // Find average zoom scale
+            const zoom = (viewport.scaleX + viewport.scaleY) / 2;
+            const idealSpacingPixels = 80;
+            const rawUnits = idealSpacingPixels / zoom;
+            
+            // Standard nice intervals for graph grids
+            const niceIntervals = [0.01, 0.02, 0.05, 0.1, 0.2, 0.5, 1, 2, 5, 10, 20, 50, 100, 200, 500, 1000];
+            let bestInterval = 1;
+            let minDiff = Infinity;
+
+            for (let candidate of niceIntervals) {
+                const diff = Math.abs(candidate - rawUnits);
+                if (diff < minDiff) {
+                    minDiff = diff;
+                    bestInterval = candidate;
+                }
+            }
+            return bestInterval;
+        }
+
+        // Shading the integral boundaries on canvas
+        function shadeArea() {
+            const startX = Math.min(state.a, state.b);
+            const endX = Math.max(state.a, state.b);
+
+            // Shading resolution: pixel-by-pixel for smoothness
+            const pStart = toCanvasCoords(startX, 0);
+            const pEnd = toCanvasCoords(endX, 0);
+            const rangePixels = Math.ceil(pEnd.x - pStart.x);
+
+            if (rangePixels <= 0) return;
+
+            // Separate positive and negative areas for clean visuals (green/red overlays)
+            // Create a path of trapezoids
+            const steps = Math.min(rangePixels, 1000); 
+            
+            ctx.save();
+            ctx.globalAlpha = 0.35; // Rich semi-transparency for overlapping shades
+
+            for (let i = 0; i < steps; i++) {
+                const px1 = pStart.x + (i / steps) * (pEnd.x - pStart.x);
+                const px2 = pStart.x + ((i + 1) / steps) * (pEnd.x - pStart.x);
+
+                const cx1 = toCartesianCoords(px1, 0).x;
+                const cx2 = toCartesianCoords(px2, 0).x;
+
+                const cy1 = state.compiledFunc(cx1);
+                const cy2 = state.compiledFunc(cx2);
+
+                if (isNaN(cy1) || isNaN(cy2) || !isFinite(cy1) || !isFinite(cy2)) continue;
+
+                const pyZero = toCanvasCoords(0, 0).y;
+                const py1 = toCanvasCoords(0, cy1).y;
+                const py2 = toCanvasCoords(0, cy2).y;
+
+                // Color code areas relative to zero
+                // Above X-axis = Positive area (Green)
+                // Below X-axis = Negative area (Red)
+                const isPositive = (cy1 + cy2) / 2 >= 0;
+                ctx.fillStyle = isPositive ? 'rgba(16, 185, 129, 0.4)' : 'rgba(239, 68, 68, 0.4)';
+
+                ctx.beginPath();
+                ctx.moveTo(px1, pyZero);
+                ctx.lineTo(px1, py1);
+                ctx.lineTo(px2, py2);
+                ctx.lineTo(px2, pyZero);
+                ctx.closePath();
+                ctx.fill();
+            }
+
+            ctx.restore();
+        }
+
+        // Smoothly draw continuous mathematical curve of the equation
+        function plotFunction() {
+            ctx.save();
+            ctx.strokeStyle = '#3b82f6'; // Bright mathematical blue
+            ctx.lineWidth = 3.5;
+            ctx.shadowColor = 'rgba(59, 130, 246, 0.4)';
+            ctx.shadowBlur = 8;
+            ctx.beginPath();
+
+            let drawing = false;
+
+            for (let px = 0; px < canvas.width; px++) {
+                const cx = toCartesianCoords(px, 0).x;
+                const cy = state.compiledFunc(cx);
+
+                if (isNaN(cy) || !isFinite(cy)) {
+                    drawing = false;
+                    continue;
+                }
+
+                const p = toCanvasCoords(cx, cy);
+
+                // Prevent drawing continuous lines off-screen artifacts
+                if (Math.abs(p.y) > canvas.height * 10) {
+                    drawing = false;
+                    continue;
+                }
+
+                if (!drawing) {
+                    ctx.moveTo(px, p.y);
+                    drawing = true;
+                } else {
+                    ctx.lineTo(px, p.y);
+                }
+            }
+
+            ctx.stroke();
+            ctx.restore();
+        }
+
+        // Draw bound vertical markers (a & b)
+        function drawBoundaries() {
+            const drawLine = (x, valLabel, color, isHovered) => {
+                const pBase = toCanvasCoords(x, 0);
+                const pyZero = toCanvasCoords(0, 0).y;
+
+                ctx.save();
+                ctx.strokeStyle = color;
+                ctx.lineWidth = isHovered ? 3 : 1.5;
+                if (!isHovered) {
+                    ctx.setLineDash([6, 4]);
+                }
+
+                // Vertical boundary line
+                ctx.beginPath();
+                ctx.moveTo(pBase.x, 0);
+                ctx.lineTo(pBase.x, canvas.height);
+                ctx.stroke();
+
+                // Dynamic coordinate pill on the x-axis for easier grab awareness
+                ctx.restore();
+                ctx.save();
+                ctx.fillStyle = color;
+                ctx.beginPath();
+                ctx.arc(pBase.x, pyZero, 6, 0, Math.PI * 2);
+                ctx.fill();
+
+                // Handle label bubble
+                ctx.fillStyle = isHovered ? color : '#334155';
+                ctx.strokeStyle = color;
+                ctx.lineWidth = 1;
+                
+                const labelText = `${valLabel} = ${x.toFixed(2)}`;
+                ctx.font = 'bold 11px sans-serif';
+                const textWidth = ctx.measureText(labelText).width;
+                const rectW = textWidth + 12;
+                const rectH = 22;
+                const rectX = pBase.x - rectW / 2;
+                const rectY = 15; // Placed nicely near top header of canvas
+
+                // Draw rounded tag
+                ctx.beginPath();
+                ctx.roundRect(rectX, rectY, rectW, rectH, 5);
+                ctx.fill();
+                ctx.stroke();
+
+                // Label Text
+                ctx.fillStyle = '#ffffff';
+                ctx.textAlign = 'center';
+                ctx.fillText(labelText, pBase.x, rectY + 15);
+                ctx.restore();
+            };
+
+            // Detect mouse proximity to lines for hover styling
+            const hoverDist = 8;
+            const mouseCart = toCartesianCoords(lastMouseX, lastMouseY);
+            
+            const isHoverA = Math.abs(lastMouseX - toCanvasCoords(state.a, 0).x) < hoverDist;
+            const isHoverB = Math.abs(lastMouseX - toCanvasCoords(state.b, 0).x) < hoverDist;
+
+            // Render boundaries with adaptive styling
+            drawLine(state.a, 'a', '#fb923c', isHoverA || state.draggingBound === 'a');
+            drawLine(state.b, 'b', '#fbbf24', isHoverB || state.draggingBound === 'b');
+        }
+
+        // Tracking mouse positions globally for calculations
+        let lastMouseX = 0;
+        let lastMouseY = 0;
+
+        // Mouse Action Event Handlers (Zoom, Pan & Drag Handles)
+        canvas.addEventListener('mousedown', (e) => {
+            const rect = canvas.getBoundingClientRect();
+            const mouseX = e.clientX - rect.left;
+            const mouseY = e.clientY - rect.top;
+
+            // Check if user is grabbing slider handles a or b
+            const pixA = toCanvasCoords(state.a, 0).x;
+            const pixB = toCanvasCoords(state.b, 0).x;
+            const clickTolerance = 12; // pixels
+
+            if (Math.abs(mouseX - pixA) < clickTolerance) {
+                state.draggingBound = 'a';
+                canvas.style.cursor = 'ew-resize';
+            } else if (Math.abs(mouseX - pixB) < clickTolerance) {
+                state.draggingBound = 'b';
+                canvas.style.cursor = 'ew-resize';
+            } else {
+                // If not dragging boundaries, start camera pan movement
+                viewport.isDragging = true;
+                viewport.startX = e.clientX;
+                viewport.startY = e.clientY;
+                viewport.initialCenterX = viewport.centerX;
+                viewport.initialCenterY = viewport.centerY;
+                canvas.style.cursor = 'grabbing';
+            }
+        });
+
+        canvas.addEventListener('mousemove', (e) => {
+            const rect = canvas.getBoundingClientRect();
+            const mouseX = e.clientX - rect.left;
+            const mouseY = e.clientY - rect.top;
+
+            lastMouseX = mouseX;
+            lastMouseY = mouseY;
+
+            const cart = toCartesianCoords(mouseX, mouseY);
+
+            if (state.draggingBound) {
+                // Snap slider value to mouse's physical Cartesian value
+                // Bound the sliders within interactive sliders boundaries [-10, 10]
+                const snappedVal = Math.max(-10, Math.min(10, Math.round(cart.x * 20) / 20)); // snap to 0.05
+                
+                if (state.draggingBound === 'a') {
+                    state.a = snappedVal;
+                    sliderA.value = snappedVal;
+                    numA.value = snappedVal.toFixed(2);
+                } else if (state.draggingBound === 'b') {
+                    state.b = snappedVal;
+                    sliderB.value = snappedVal;
+                    numB.value = snappedVal.toFixed(2);
+                }
+                
+                calculateIntegrals();
+                draw();
+            } else if (viewport.isDragging) {
+                // Handle panning calculation
+                const dx = e.clientX - viewport.startX;
+                const dy = e.clientY - viewport.startY;
+                
+                viewport.centerX = viewport.initialCenterX - dx / viewport.scaleX;
+                viewport.centerY = viewport.initialCenterY + dy / viewport.scaleY;
+                
+                draw();
+            } else {
+                // Adjust cursor state based on interaction position
+                const pixA = toCanvasCoords(state.a, 0).x;
+                const pixB = toCanvasCoords(state.b, 0).x;
+                const clickTolerance = 10;
+
+                if (Math.abs(mouseX - pixA) < clickTolerance || Math.abs(mouseX - pixB) < clickTolerance) {
+                    canvas.style.cursor = 'ew-resize';
+                } else {
+                    canvas.style.cursor = 'grab';
+                }
+
+                // Show coordinate indicators on hovering curve
+                showHoverIndicator(mouseX, mouseY);
+                draw(); // Redraw handles hover status highlights
+            }
+        });
+
+        window.addEventListener('mouseup', () => {
+            state.draggingBound = null;
+            viewport.isDragging = false;
+            canvas.style.cursor = 'grab';
+        });
+
+        // Interactive Zoom via Scroll Wheel
+        canvas.addEventListener('wheel', (e) => {
+            e.preventDefault();
+            const rect = canvas.getBoundingClientRect();
+            const mouseX = e.clientX - rect.left;
+            const mouseY = e.clientY - rect.top;
+
+            // Preserve anchor point under mouse coordinate during zooming
+            const mouseCartBefore = toCartesianCoords(mouseX, mouseY);
+
+            const zoomFactor = e.deltaY < 0 ? 1.15 : 1 / 1.15;
+            
+            // Constrain zoom scales
+            const nextScaleX = viewport.scaleX * zoomFactor;
+            const nextScaleY = viewport.scaleY * zoomFactor;
+            
+            if (nextScaleX > 10 && nextScaleX < 10000) {
+                viewport.scaleX = nextScaleX;
+                viewport.scaleY = nextScaleY;
+
+                // Adjust centers so physical mouse coordinates maintain spatial parity
+                viewport.centerX = mouseCartBefore.x - (mouseX - canvas.width / 2) / viewport.scaleX;
+                viewport.centerY = mouseCartBefore.y + (mouseY - canvas.height / 2) / viewport.scaleY;
+                
+                draw();
+                showHoverIndicator(mouseX, mouseY);
+            }
+        });
+
+        // Display coordinate tooltip values on graph curve hover
+        function showHoverIndicator(mouseX, mouseY) {
+            if (!state.compiledFunc) {
+                indicator.style.display = 'none';
+                return;
+            }
+
+            const cartX = toCartesianCoords(mouseX, mouseY).x;
+            const cartY = state.compiledFunc(cartX);
+
+            if (isNaN(cartY) || !isFinite(cartY)) {
+                indicator.style.display = 'none';
+                return;
+            }
+
+            const pCurve = toCanvasCoords(cartX, cartY);
+            const dist = Math.abs(mouseY - pCurve.y);
+
+            // Trigger indicator proximity limit
+            if (dist < 40) {
+                indicator.style.display = 'block';
+                indicator.style.left = `${pCurve.x + 15}px`;
+                indicator.style.top = `${pCurve.y - 15}px`;
+                indicator.innerHTML = `x: ${cartX.toFixed(3)}<br>y: ${cartY.toFixed(3)}`;
+            } else {
+                indicator.style.display = 'none';
+            }
+        }
+
+        // Camera control interactions
+        document.getElementById('btn-zoom-in').addEventListener('click', () => {
+            viewport.scaleX *= 1.25;
+            viewport.scaleY *= 1.25;
+            draw();
+        });
+
+        document.getElementById('btn-zoom-out').addEventListener('click', () => {
+            viewport.scaleX /= 1.25;
+            viewport.scaleY /= 1.25;
+            draw();
+        });
+
+        document.getElementById('btn-reset-view').addEventListener('click', () => {
+            initViewport();
+            draw();
+        });
+
+        // Standard event listeners for input fields syncs
+        funcInput.addEventListener('input', () => {
+            presetSelect.value = 'custom';
+            updateFunction();
+        });
+
+        // Setup boundary state sync logic
+        function setupBoundarySync(slider, input, boundaryKey) {
+            slider.addEventListener('input', () => {
+                state[boundaryKey] = parseFloat(slider.value);
+                input.value = slider.value;
+                calculateIntegrals();
+                draw();
+            });
+
+            input.addEventListener('change', () => {
+                let val = parseFloat(input.value);
+                if (isNaN(val)) val = 0;
+                val = Math.max(-10, Math.min(10, val));
+                state[boundaryKey] = val;
+                input.value = val;
+                slider.value = val;
+                calculateIntegrals();
+                draw();
+            });
+        }
+
+        setupBoundarySync(sliderA, numA, 'a');
+        setupBoundarySync(sliderB, numB, 'b');
+
+        // Manage Preset drop-downs
+        presetSelect.addEventListener('change', () => {
+            const presetKey = presetSelect.value;
+            if (presetKey === 'custom') return;
+
+            const preset = PRESETS[presetKey];
+            funcInput.value = preset.f;
+            
+            state.a = preset.a;
+            sliderA.value = preset.a;
+            numA.value = preset.a;
+
+            state.b = preset.b;
+            sliderB.value = preset.b;
+            numB.value = preset.b;
+
+            updateFunction();
+        });
+
+        // Set resizing listeners
+        window.addEventListener('resize', draw);
+
+        // Run application sequence on load
+        window.onload = () => {
+            initViewport();
+            updateFunction();
+        };
+    </script>
+</body>
+</html>
